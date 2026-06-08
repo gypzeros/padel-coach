@@ -30,7 +30,7 @@ WEB_PLOTS = os.path.join(WEB_DIR, "plots")
 os.makedirs(WEB_DIR, exist_ok=True)
 os.makedirs(WEB_VIDEOS, exist_ok=True)
 os.makedirs(WEB_PLOTS, exist_ok=True)
-INDEX_HTML = os.path.join(WEB_DIR, "index.html")
+INDEX_HTML = os.path.join(WEB_DIR, "demo.html")   # landing is the real index.html now
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 
 
@@ -850,7 +850,7 @@ img.plot {{ display: block; width: 100%; height: auto; background: #fff; border-
 <header>
     <div class="brand">PADEL<span>COACH</span></div>
     <span class="sub">Comparación biomecánica · DTW anclada al impacto</span>
-    <a href="landing.html">← Volver</a>
+    <a href="/">← Volver</a>
 </header>
 <main>
 

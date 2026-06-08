@@ -10,7 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 GLB = os.path.join(ROOT, "models", "smash.glb")
 TEMPLATE = os.path.join(ROOT, "web", "landing_template.html")
-OUT = os.path.join(ROOT, "web", "landing.html")
+OUT = os.path.join(ROOT, "web", "index.html")   # served as the root of the site
 PLACEHOLDER = "__SMASH_GLB__"
 
 
