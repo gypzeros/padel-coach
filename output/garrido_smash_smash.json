@@ -1,0 +1,13 @@
+{
+  "start": 38,
+  "apex": 55,
+  "impact": 55,
+  "end": 70,
+  "fps": 25.0,
+  "duration_s": 1.28,
+  "y_at_apex_px": 367.51333333333326,
+  "vy_post_impact_max_pxpf": 61.66,
+  "dominant": "right_wrist",
+  "person_id": 0,
+  "video_csv": "garrido_smash_pose.csv"
+}

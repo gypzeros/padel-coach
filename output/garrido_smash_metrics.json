@@ -1,0 +1,32 @@
+{
+  "video": "garrido_smash",
+  "dominant": "right_wrist",
+  "fps": 25.0,
+  "phases": {
+    "start": 38,
+    "apex_impact": 55,
+    "end": 70,
+    "prep_to_impact_s": 0.68,
+    "follow_through_s": 0.6
+  },
+  "at_impact": {
+    "elbow_angle_deg": 134.013739822757,
+    "wrist_speed_ms": 2.4285077722749833,
+    "wrist_height_m": -0.9527,
+    "left_knee_angle_deg": 176.6159931788681,
+    "right_knee_angle_deg": 158.52465794207737,
+    "trunk_lean_deg": 38.56147966233281,
+    "feet_separation_m": 0.4107302399385757
+  },
+  "at_start": {
+    "left_knee_angle_deg": 141.23290789753472,
+    "right_knee_angle_deg": 113.39819197482664,
+    "wrist_height_m": -0.413,
+    "feet_separation_m": 0.321835812177576
+  },
+  "peak_wrist_speed": {
+    "value_ms": 8.74850228253385,
+    "frame": 50,
+    "offset_from_impact_frames": -5
+  }
+}

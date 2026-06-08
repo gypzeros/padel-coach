@@ -1,0 +1,32 @@
+{
+  "video": "user_smash",
+  "dominant": "right_wrist",
+  "fps": 25.0,
+  "phases": {
+    "start": 34,
+    "apex_impact": 49,
+    "end": 65,
+    "prep_to_impact_s": 0.6,
+    "follow_through_s": 0.64
+  },
+  "at_impact": {
+    "elbow_angle_deg": 128.64521967527753,
+    "wrist_speed_ms": 3.8703161208097714,
+    "wrist_height_m": -0.841,
+    "left_knee_angle_deg": 148.1558790704502,
+    "right_knee_angle_deg": 105.26560347874221,
+    "trunk_lean_deg": 37.21525110863111,
+    "feet_separation_m": 0.26501315061709674
+  },
+  "at_start": {
+    "left_knee_angle_deg": 101.27963014059326,
+    "right_knee_angle_deg": 103.880426328556,
+    "wrist_height_m": -0.5109,
+    "feet_separation_m": 0.37448359109579155
+  },
+  "peak_wrist_speed": {
+    "value_ms": 9.621235952308831,
+    "frame": 47,
+    "offset_from_impact_frames": -2
+  }
+}

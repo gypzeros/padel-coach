@@ -1,0 +1,62 @@
+{
+  "pro_window": {
+    "start": 40,
+    "impact": 55,
+    "end": 70
+  },
+  "user_window": {
+    "start": 34,
+    "impact": 49,
+    "end": 64
+  },
+  "warp_path_length": 42,
+  "per_metric": {
+    "dominant_elbow_angle_deg": {
+      "delta_at_impact": -5.368500000000012,
+      "mean_abs_delta": 16.249602380952382,
+      "max_abs_delta": 82.64059999999999
+    },
+    "dominant_wrist_speed_ms": {
+      "delta_at_impact": 1.4417999999999997,
+      "mean_abs_delta": 1.8381285714285716,
+      "max_abs_delta": 7.3314
+    },
+    "dominant_wrist_height_m": {
+      "delta_at_impact": 0.11170000000000002,
+      "mean_abs_delta": 0.10498095238095241,
+      "max_abs_delta": 0.31370000000000003
+    },
+    "left_knee_angle_deg": {
+      "delta_at_impact": -28.46010000000001,
+      "mean_abs_delta": 19.909250000000004,
+      "max_abs_delta": 84.8173
+    },
+    "right_knee_angle_deg": {
+      "delta_at_impact": -53.25909999999999,
+      "mean_abs_delta": 28.334185714285713,
+      "max_abs_delta": 92.74510000000001
+    },
+    "trunk_lean_deg": {
+      "delta_at_impact": -1.3462000000000032,
+      "mean_abs_delta": 9.76172380952381,
+      "max_abs_delta": 31.858099999999993
+    },
+    "hip_shoulder_separation_m": {
+      "delta_at_impact": 0.030799999999999994,
+      "mean_abs_delta": 0.05397857142857143,
+      "max_abs_delta": 0.2283
+    },
+    "feet_separation_m": {
+      "delta_at_impact": -0.1457,
+      "mean_abs_delta": 0.12473571428571428,
+      "max_abs_delta": 0.46930000000000005
+    }
+  },
+  "biggest_diffs": [
+    "right_knee_angle_deg",
+    "left_knee_angle_deg",
+    "dominant_elbow_angle_deg",
+    "trunk_lean_deg",
+    "dominant_wrist_speed_ms"
+  ]
+}

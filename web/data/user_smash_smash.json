@@ -1,0 +1,13 @@
+{
+  "start": 34,
+  "apex": 49,
+  "impact": 49,
+  "end": 65,
+  "fps": 25.0,
+  "duration_s": 1.24,
+  "y_at_apex_px": 428.5466666666667,
+  "vy_post_impact_max_pxpf": 52.691666666666634,
+  "dominant": "right_wrist",
+  "person_id": 1,
+  "video_csv": "user_smash_pose.csv"
+}

@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PadelCoach — analiza tu smash como un pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+    --cream: #EEE7DA;
+    --red: #99040D;
+    --dark: #2F0103;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow-x: hidden; }
+body {
+    background: var(--dark);
+    color: var(--cream);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ===== HERO ===== */
+.hero {
+    position: relative;
+    width: 100%; height: 100vh; min-height: 700px;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 70% 30%, rgba(153,4,13,0.55) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 80%, rgba(47,1,3,0.85) 0%, transparent 65%),
+        linear-gradient(135deg, #1a0001 0%, var(--dark) 45%, #4a0508 100%);
+}
+.hero::after {
+    /* film grain */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        radial-gradient(rgba(238,231,218,0.07) 1px, transparent 1px);
+    background-size: 3px 3px;
+    opacity: 0.4; mix-blend-mode: overlay;
+}
+#scene-canvas {
+    position: absolute; inset: 0;
+    width: 100% !important; height: 100% !important;
+    z-index: 1;
+}
+
+.nav {
+    position: absolute; top: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 28px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 800; letter-spacing: 0.04em;
+}
+.nav .brand { font-size: 18px; text-transform: uppercase; }
+.nav .brand span { color: var(--red); }
+.nav a {
+    color: var(--cream); text-decoration: none;
+    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
+    font-weight: 500; opacity: 0.8;
+    transition: opacity .2s;
+}
+.nav a:hover { opacity: 1; }
+
+.hero-content {
+    position: relative; z-index: 5;
+    height: 100%;
+    display: grid; align-items: center;
+    grid-template-columns: 1fr;
+    padding: 100px 48px 80px;  /* room for nav (top) and scroll-cue (bottom) */
+    pointer-events: none;
+}
+.hero-text {
+    max-width: 720px;
+    pointer-events: auto;
+}
+.kicker {
+    display: inline-block;
+    font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--red); font-weight: 800;
+    padding: 8px 14px;
+    border: 1px solid rgba(153,4,13,0.55);
+    border-radius: 999px;
+    margin-bottom: 28px;
+}
+h1.title {
+    /* cap by both viewport width AND height so 3 lines never push the CTAs off-screen */
+    font-size: min(clamp(48px, 8vw, 128px), 16vh);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+}
+h1.title .accent {
+    color: var(--red);
+    font-style: italic;
+    display: inline-block;
+    transform: skewX(-3deg);
+}
+.sub {
+    font-size: clamp(16px, 1.4vw, 20px);
+    line-height: 1.55;
+    max-width: 540px;
+    color: rgba(238,231,218,0.78);
+    font-weight: 300;
+    margin-bottom: 40px;
+}
+.cta-row {
+    display: flex; gap: 14px; flex-wrap: wrap;
+}
+.cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 24px;
+    font-family: inherit; font-size: 13px; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    text-decoration: none; cursor: pointer;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: transform .15s ease, box-shadow .25s ease, background .2s ease;
+}
+.cta-primary {
+    background: var(--cream); color: var(--dark);
+    box-shadow: 0 20px 40px -16px rgba(238,231,218,0.45);
+}
+.cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 26px 50px -16px rgba(238,231,218,0.6);
+}
+.cta-ghost {
+    background: transparent; color: var(--cream);
+    border: 1px solid rgba(238,231,218,0.35);
+}
+.cta-ghost:hover { background: rgba(238,231,218,0.08); border-color: var(--cream); }
+.cta .arrow { transition: transform .2s ease; }
+.cta:hover .arrow { transform: translateX(4px); }
+
+/* big vertical ticker on the right edge of hero */
+.side-ticker {
+    position: absolute; right: 28px; top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase;
+    color: rgba(238,231,218,0.4);
+    z-index: 6;
+    display: flex; gap: 32px;
+}
+
+/* scroll cue */
+.scroll-cue {
+    position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+    z-index: 6;
+    color: rgba(238,231,218,0.55);
+    font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    animation: bob 3s ease-in-out infinite;
+}
+.scroll-cue .line {
+    width: 1px; height: 36px;
+    background: linear-gradient(to bottom, var(--cream), transparent);
+}
+@keyframes bob { 50% { transform: translate(-50%, 6px); } }
+
+/* ===== STATS BAND ===== */
+.stats {
+    background: var(--cream); color: var(--dark);
+    padding: 60px 48px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 40px;
+}
+.stat .num {
+    font-size: 56px; font-weight: 900; letter-spacing: -0.03em;
+    color: var(--red); line-height: 1;
+}
+.stat .label {
+    margin-top: 10px; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.22em; font-weight: 500;
+}
+
+/* ===== FEATURES ===== */
+.features {
+    background: var(--dark); padding: 120px 48px;
+}
+.features-head {
+    max-width: 720px; margin: 0 auto 80px; text-align: center;
+}
+.features-head h2 {
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 900; line-height: 1; letter-spacing: -0.03em;
+    text-transform: uppercase; margin-bottom: 16px;
+}
+.features-head h2 .accent { color: var(--red); }
+.features-head p { color: rgba(238,231,218,0.7); font-size: 16px; line-height: 1.6; }
+.features-grid {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+.feature {
+    border: 1px solid rgba(238,231,218,0.12);
+    background: rgba(238,231,218,0.03);
+    border-radius: 16px; padding: 32px;
+    transition: border-color .25s, background .25s, transform .25s;
+}
+.feature:hover {
+    border-color: rgba(153,4,13,0.6);
+    background: rgba(153,4,13,0.06);
+    transform: translateY(-4px);
+}
+.feature .icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--red);
+    color: var(--cream);
+    display: grid; place-items: center;
+    font-size: 22px; font-weight: 900;
+    margin-bottom: 20px;
+}
+.feature h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+.feature p { color: rgba(238,231,218,0.65); font-size: 14px; line-height: 1.6; }
+
+/* ===== FINAL CTA ===== */
+.final {
+    padding: 140px 48px; text-align: center;
+    background: radial-gradient(ellipse at center, rgba(153,4,13,0.35) 0%, var(--dark) 70%);
+}
+.final h2 {
+    font-size: clamp(40px, 6vw, 96px);
+    font-weight: 900; line-height: 0.95; letter-spacing: -0.03em;
+    text-transform: uppercase; margin-bottom: 32px;
+}
+footer {
+    padding: 36px 48px; text-align: center;
+    color: rgba(238,231,218,0.4); font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    border-top: 1px solid rgba(238,231,218,0.08);
+}
+
+/* camera-flash overlay (fixed, covers viewport, briefly white) */
+.flash-overlay {
+    position: fixed; inset: 0;
+    background: var(--cream);
+    opacity: 0; pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: screen;
+}
+.flash-overlay.flash-fire {
+    animation: shutter 320ms cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+@keyframes shutter {
+    0%   { opacity: 0; }
+    6%   { opacity: 0.95; }
+    20%  { opacity: 0.55; }
+    60%  { opacity: 0.12; }
+    100% { opacity: 0; }
+}
+
+@media (max-width: 720px) {
+    .nav { padding: 20px 24px; }
+    .hero-content { padding: 0 24px; }
+    .stats, .features, .final, footer { padding-left: 24px; padding-right: 24px; }
+    .side-ticker { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="flash-overlay" class="flash-overlay"></div>
+
+<section class="hero">
+    <canvas id="scene-canvas"></canvas>
+
+    <nav class="nav">
+        <div class="brand">PADEL<span>COACH</span></div>
+        <a href="index.html">Ver demo →</a>
+    </nav>
+
+    <div class="side-ticker">
+        <span>MediaPipe Pose</span><span>YOLO11 Racket</span><span>DTW Alignment</span><span>SMPL Coming Soon</span>
+    </div>
+
+    <div class="hero-content">
+        <div class="hero-text">
+            <span class="kicker">Smash analysis ▸ pose-based</span>
+            <h1 class="title">Mejora tu<br><span class="accent">smash</span><br>como un pro</h1>
+            <div class="cta-row" style="margin-top: 40px;">
+                <a href="index.html" class="cta cta-primary">
+                    Empezar análisis <span class="arrow">→</span>
+                </a>
+                <a href="#features" class="cta cta-ghost">Cómo funciona</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-cue">
+        <span>Scroll</span>
+        <div class="line"></div>
+    </div>
+</section>
+
+<section class="stats">
+    <div class="stat"><div class="num">33</div><div class="label">Landmarks 3D por frame</div></div>
+    <div class="stat"><div class="num">100%</div><div class="label">Detección de pala en swing</div></div>
+    <div class="stat"><div class="num">8×</div><div class="label">Cámara lenta sincronizada</div></div>
+    <div class="stat"><div class="num">10+</div><div class="label">Métricas biomecánicas</div></div>
+</section>
+
+<section class="features" id="features">
+    <div class="features-head">
+        <h2>Todo lo que <span class="accent">no ves</span> a simple vista</h2>
+        <p>Detección de pose con MediaPipe, racket tracking con YOLO11, alineación temporal con DTW anclada al impacto y comparación cuantitativa frame a frame contra el mejor.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature">
+            <div class="icon">↗</div>
+            <h3>Overlay sincronizado</h3>
+            <p>Dos esqueletos superpuestos a cámara lenta 8×, anclados por el frame exacto del impacto. Tu pose vs la del pro, frame a frame.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">∡</div>
+            <h3>Métricas calibradas en cm</h3>
+            <p>Usamos la longitud real de la pala (45.5 cm) como regla para convertir píxeles a centímetros. Comparaciones reales entre cámaras distintas.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">▶</div>
+            <h3>Scrubber interactivo</h3>
+            <p>Mueve el slider para ver cualquier momento del swing. Separa los esqueletos horizontalmente para analizar diferencias en detalle.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">!</div>
+            <h3>Consejos accionables</h3>
+            <p>El sistema convierte los deltas numéricos en consejos en castellano: qué corregir, por qué y cómo. Ordenados por prioridad.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">⌘</div>
+            <h3>Multi-persona robusto</h3>
+            <p>Detecta a todos los jugadores y elige automáticamente al que está smasheando — incluso con palas múltiples en pantalla.</p>
+        </div>
+        <div class="feature">
+            <div class="icon">◐</div>
+            <h3>Filtro de glitches</h3>
+            <p>Mediano condicional que elimina outliers puntuales de MediaPipe sin matar los movimientos rápidos reales del impacto.</p>
+        </div>
+    </div>
+</section>
+
+<section class="final">
+    <h2>Tu próximo<br>punto perfecto<br>empieza aquí</h2>
+    <a href="index.html" class="cta cta-primary">Ver el análisis demo →</a>
+</section>
+
+<footer>
+    Padel Coach · Pose · Pala · Métrica
+</footer>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const canvas = document.getElementById('scene-canvas');
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x2F0103, 6, 18);
+
+const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+camera.position.set(0, 0.8, 7);
+camera.lookAt(0, 0.4, 0);
+
+const renderer = new THREE.WebGLRenderer({
+    canvas, antialias: true, alpha: true
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+
+// ---- lighting (cinematic key + red rim) ----
+scene.add(new THREE.AmbientLight(0xEEE7DA, 0.35));
+const key = new THREE.DirectionalLight(0xEEE7DA, 2.0);
+key.position.set(4, 6, 6);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x99040D, 3.5);
+rim.position.set(-5, 3, -5);
+scene.add(rim);
+const fill = new THREE.PointLight(0x99040D, 35, 14);
+fill.position.set(2, 0, 4);
+scene.add(fill);
+const topLight = new THREE.SpotLight(0xEEE7DA, 4, 15, Math.PI/6, 0.4, 1);
+topLight.position.set(0, 8, 2);
+topLight.target.position.set(0, 0, 0);
+scene.add(topLight); scene.add(topLight.target);
+
+// ---- futuristic mesh: load the AI-generated smash.glb ----
+const figure = new THREE.Group();
+scene.add(figure);
+
+let mixer = null;
+const clock = new THREE.Clock();
+
+const bodyMat = new THREE.MeshStandardMaterial({
+    color: 0xEEE7DA,
+    metalness: 0.55,
+    roughness: 0.35,
+    emissive: 0x99040D,
+    emissiveIntensity: 0.10,
+});
+
+new GLTFLoader().load("__SMASH_GLB__", (gltf) => {
+    const model = gltf.scene;
+
+    // Auto-fit: centre + scale so the bounding box height is ~5 units.
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const centre = box.getCenter(new THREE.Vector3());
+    const targetHeight = 3.2;
+    const scale = targetHeight / Math.max(size.y, 1e-6);
+    model.scale.setScalar(scale);
+    // Re-centre after scaling.
+    model.position.sub(centre.multiplyScalar(scale));
+    model.position.y -= 0.2;  // small downward nudge
+
+    // Override every material with the chrome-cream PBR look.
+    // Keep original textures if the model has them — multiply by tint instead.
+    model.traverse((o) => {
+        if (o.isMesh || o.isSkinnedMesh) {
+            const original = o.material;
+            const mat = bodyMat.clone();
+            // If the original had a texture, reuse it but tinted toward cream.
+            if (original && original.map) {
+                mat.map = original.map;
+                mat.color.setHex(0xFFFFFF);  // don't double-tint texture
+            }
+            o.material = mat;
+            o.castShadow = true;
+            o.receiveShadow = true;
+        }
+    });
+
+    figure.add(model);
+
+    // If the GLB ships with animations, play the first one in a loop.
+    if (gltf.animations && gltf.animations.length) {
+        mixer = new THREE.AnimationMixer(model);
+        mixer.clipAction(gltf.animations[0]).play();
+    }
+}, (xhr) => {
+    if (xhr.lengthComputable) {
+        const pct = (xhr.loaded / xhr.total) * 100;
+        if (pct >= 100) console.log("smash.glb loaded");
+    }
+}, (err) => {
+    console.error("smash.glb load failed", err);
+});
+
+// ---- background rings (stage) ----
+const ringGeo = new THREE.TorusGeometry(3.6, 0.04, 8, 96);
+const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+    color: 0x99040D, transparent: true, opacity: 0.5,
+}));
+ring.rotation.x = Math.PI / 2;
+ring.position.y = -1.4;
+scene.add(ring);
+
+const ring2 = ring.clone();
+ring2.scale.set(0.78, 0.78, 0.78);
+ring2.position.y = -1.35;
+scene.add(ring2);
+
+// ---- floating particles ----
+const particleGeo = new THREE.BufferGeometry();
+const count = 200;
+const positions = new Float32Array(count * 3);
+for (let i = 0; i < count; i++) {
+    positions[i*3]   = (Math.random() - 0.5) * 18;
+    positions[i*3+1] = (Math.random() - 0.5) * 12;
+    positions[i*3+2] = (Math.random() - 0.5) * 12;
+}
+particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+const particles = new THREE.Points(
+    particleGeo,
+    new THREE.PointsMaterial({
+        color: 0xEEE7DA, size: 0.035, transparent: true, opacity: 0.45,
+        sizeAttenuation: true, depthWrite: false,
+    })
+);
+scene.add(particles);
+
+// ---- post-processing: bloom for neon glow ----
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(
+    new THREE.Vector2(canvas.clientWidth, canvas.clientHeight),
+    0.85,   // strength
+    0.4,    // radius
+    0.18    // threshold
+);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+function resizeComposer() {
+    composer.setSize(canvas.clientWidth, canvas.clientHeight);
+    bloom.setSize(canvas.clientWidth, canvas.clientHeight);
+}
+window.addEventListener('resize', resizeComposer);
+
+// ---- mouse-influenced parallax ----
+let mouseX = 0, mouseY = 0;
+window.addEventListener('pointermove', (e) => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 0.6;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 0.3;
+});
+
+// ---- camera-flash: snap 45° every cycle, white flash overlay timed with the snap ----
+const flashOverlay = document.getElementById('flash-overlay');
+const SNAP_DEG = 45;
+const FLASH_INTERVAL_MS = 1600;  // time between flashes
+const SNAP_DELAY_MS = 60;        // when (inside the flash) to swap the angle
+let snapAngle = 0;
+
+function fireFlash() {
+    flashOverlay.classList.remove('flash-fire');
+    void flashOverlay.offsetWidth;   // restart CSS animation
+    flashOverlay.classList.add('flash-fire');
+    // Snap the figure at the peak of the white-out so the rotation transition is hidden.
+    setTimeout(() => {
+        snapAngle += (SNAP_DEG * Math.PI) / 180;
+    }, SNAP_DELAY_MS);
+}
+setInterval(fireFlash, FLASH_INTERVAL_MS);
+
+function animate() {
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+    if (mixer) mixer.update(dt);
+    // Snap angle (no easing) + mouse parallax overlay.
+    figure.rotation.y = snapAngle + mouseX * 0.5;
+    figure.rotation.x = mouseY * 0.2;
+    ring.rotation.z += 0.0015;
+    ring2.rotation.z -= 0.0022;
+    particles.rotation.y += 0.0006;
+    composer.render();
+}
+
+resize();
+resizeComposer();
+animate();
+</script>
+</body>
+</html>
